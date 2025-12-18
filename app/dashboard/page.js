@@ -31,7 +31,6 @@ export default function Dashboard() {
     }
     setUser(user)
 
-    // 프로필 가져오기
     const { data: profileData } = await supabase
       .from('profiles')
       .select('*, agencies(*)')
@@ -40,11 +39,9 @@ export default function Dashboard() {
 
     setProfile(profileData)
 
-    // 에이전시 목록
     const { data: agencyList } = await supabase.from('agencies').select('*')
     setAgencies(agencyList || [])
 
-    // 데이터 가져오기
     await fetchData()
     setLoading(false)
   }
@@ -75,7 +72,6 @@ export default function Dashboard() {
       const ws = wb.Sheets[wsname]
       const jsonData = XLSX.utils.sheet_to_json(ws)
 
-      // 데이터 변환 및 저장
       const rows = jsonData.map(row => ({
         period: uploadPeriod,
         agency_id: uploadAgency,
@@ -119,7 +115,6 @@ export default function Dashboard() {
     )
   }
 
-  // 필터링
   const filteredData = data.filter(r => {
     if (selectedPeriod !== 'all' && r.period !== selectedPeriod) return false
     if (selectedGroup !== 'all' && r.group_name !== selectedGroup) return false
@@ -129,7 +124,6 @@ export default function Dashboard() {
   const periods = ['all', ...new Set(data.map(r => r.period).filter(Boolean))]
   const groups = ['all', ...new Set(data.map(r => r.group_name).filter(Boolean))]
 
-  // 통계
   const stats = {
     totalDiamonds: filteredData.reduce((s, r) => s + (r.diamonds || 0), 0),
     totalCreators: filteredData.length,
@@ -137,7 +131,6 @@ export default function Dashboard() {
     newCreators: filteredData.filter(r => r.days_joined <= 30).length,
   }
 
-  // 그룹별 집계
   const groupStats = groups.slice(1).map(g => {
     const rows = filteredData.filter(r => r.group_name === g)
     return {
@@ -151,7 +144,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
-      {/* 헤더 */}
       <header className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur border-b border-slate-700/50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -163,15 +155,16 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             {isAdmin && (
-  <>
-    <button
-      onClick={() => router.push('/admin')}
-      className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm font-medium"
-    >
-      ⚙️ 관리자
-    </button>
-    <button
-      onClick={() => setUploadModal(true)}
+              <button
+                onClick={() => router.push('/admin')}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm font-medium"
+              >
+                ⚙️ 관리자
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setUploadModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-medium"
               >
                 📤 데이터 업로드
@@ -187,7 +180,6 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* 업로드 모달 */}
       {uploadModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md">
@@ -236,9 +228,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 메인 */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* 필터 */}
         <div className="flex flex-wrap items-center gap-3 mb-6 p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30">
           <span className="text-slate-400 text-sm">📆 기간:</span>
           <select
@@ -264,7 +254,6 @@ export default function Dashboard() {
           </select>
         </div>
 
-        {/* 요약 카드 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-gradient-to-br from-indigo-600/20 to-indigo-900/20 border border-indigo-500/30 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-2 text-slate-400 text-sm">💎 총 다이아몬드</div>
@@ -284,7 +273,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 탭 */}
         <div className="flex gap-1 mb-4 bg-slate-800/50 p-1 rounded-xl w-fit">
           <button
             onClick={() => setTab('overview')}
@@ -300,7 +288,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* 그룹별 현황 */}
         {tab === 'overview' && (
           <div className="bg-slate-800/40 border border-slate-700/30 rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-slate-700/30 font-semibold">📋 그룹별 현황</div>
@@ -325,7 +312,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 크리에이터 목록 */}
         {tab === 'creators' && (
           <div className="bg-slate-800/40 border border-slate-700/30 rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-slate-700/30 font-semibold">👤 크리에이터 목록</div>
